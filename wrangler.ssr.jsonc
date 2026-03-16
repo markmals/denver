@@ -1,0 +1,14 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "denver-ssr",
+    "main": "workers/entry.ssr.tsx",
+    "workers_dev": true,
+    "services": [
+        {
+            "binding": "RSC",
+            "service": "denver"
+        }
+    ],
+    "compatibility_date": "2026-02-28",
+    "compatibility_flags": ["nodejs_als", "nodejs_compat"]
+}
