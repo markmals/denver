@@ -4,7 +4,7 @@ import { isRouteErrorResponse, Outlet } from "react-router";
 
 import type { Route } from "./+types/root";
 
-import styles from "./styles/tailwind.css?url";
+import styles from "./tailwind.css?url";
 
 export function Layout({ children }: PropsWithChildren) {
     return (
@@ -14,9 +14,17 @@ export function Layout({ children }: PropsWithChildren) {
                 <meta content="width=device-width, initial-scale=1" name="viewport" />
                 <meta content="#000000" name="theme-color" />
                 <link href={styles} rel="stylesheet" />
-                <title>denver</title>
+                <link href="https://rsms.me/inter/inter.css" rel="stylesheet" />
+                <link href="favicon.png" rel="icon" type="image/png" />
+                <title>Denver</title>
             </head>
-            <body>{children}</body>
+            <body className="relative isolate flex min-h-svh w-full flex-col bg-gray-200 text-zinc-950 dark:bg-black dark:text-white">
+                <main className="flex flex-1 flex-col px-2 py-2">
+                    <div className="grow rounded-lg bg-white p-10 shadow-xs ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+                        <div className="mx-auto max-w-6xl">{children}</div>
+                    </div>
+                </main>
+            </body>
         </html>
     );
 }
