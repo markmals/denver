@@ -40,3 +40,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: deploy --config build/server/wrangler.json
+          packageManager: npm
