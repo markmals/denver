@@ -1,5 +1,8 @@
-import { clsx } from "clsx";
+"use client";
+
 import type React from "react";
+
+import { clsx } from "clsx";
 import { Switch as RACSwitch } from "react-aria-components";
 
 export function SwitchGroup({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
@@ -151,7 +154,7 @@ export function Switch({
             className={clsx(
                 className,
                 // Base styles
-                "group relative isolate inline-flex h-6 w-10 cursor-default rounded-full p-[3px] sm:h-5 sm:w-8",
+                "group relative isolate inline-flex h-6 w-10 cursor-default rounded-full p-0.75 sm:h-5 sm:w-8",
                 // Transitions
                 "transition duration-200 ease-in-out",
                 // Outline and background color in forced-colors mode so switch is still visible

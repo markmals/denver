@@ -1,3 +1,5 @@
+"use client";
+
 import { Button as RACButton } from "react-aria-components";
 import { clsx } from "clsx";
 import type React from "react";

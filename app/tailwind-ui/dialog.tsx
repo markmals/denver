@@ -1,3 +1,5 @@
+"use client";
+
 import clsx from "clsx";
 import type React from "react";
 import { Heading, Modal, ModalOverlay, Dialog as RACDialog } from "react-aria-components";

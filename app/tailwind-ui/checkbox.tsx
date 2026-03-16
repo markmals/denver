@@ -1,3 +1,5 @@
+"use client";
+
 import { clsx } from "clsx";
 import type React from "react";
 import { Checkbox as RACCheckbox } from "react-aria-components";
