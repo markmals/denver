@@ -29,8 +29,8 @@ async function ListItem({ id }: { id: string }) {
     return (
         <li className="flex flex-col items-start gap-6 border-black/15 pt-10 pb-6 md:flex-row dark:border-white/15">
             <div className="relative w-full md:w-auto">
-                <div className="aspect-w-3 aspect-h-2 md:aspect-w-1 md:aspect-h-1 block w-full overflow-hidden rounded-lg bg-black/10 md:w-52 dark:bg-white/10">
-                    <img alt="" className="object-cover" src={entry.data.thumbnail} />
+                <div className="aspect-3/2 md:aspect-square block w-full overflow-hidden rounded-lg bg-black/10 md:w-52 dark:bg-white/10">
+                    <img alt="" className="size-full object-cover" src={entry.data.thumbnail} />
                 </div>
             </div>
 
