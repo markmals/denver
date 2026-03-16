@@ -16,9 +16,7 @@ export function Layout({ children }: PropsWithChildren) {
                 <link href={styles} rel="stylesheet" />
                 <title>denver</title>
             </head>
-            <body>
-                {children}
-            </body>
+            <body>{children}</body>
         </html>
     );
 }

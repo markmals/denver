@@ -6,14 +6,18 @@
         "postinstall": "vpx react-router typegen"
     },
     "dependencies": {
+        "@heroicons/react": "^2.2.0",
         "@react-router/node": "^7.13.1",
         "@remix-run/data-schema": "^0.1.0",
         "@std/jsonc": "jsr:^1.0.2",
         "@std/yaml": "jsr:^1.0.12",
+        "clsx": "^2.1.1",
+        "framer-motion": "^12.36.0",
         "github-slugger": "^2.0.0",
         "gray-matter": "^4.0.3",
         "isbot": "^5.1.36",
         "react": "^19.2.4",
+        "react-aria-components": "^1.16.0",
         "react-dom": "^19.2.4",
         "react-router": "^7.13.1"
     },

@@ -21,7 +21,9 @@
         "jsx": "react-jsx",
         "rootDirs": [".", "./.react-router/types"],
         "paths": {
-            "~/*": ["./app/*"]
+            "~/*": ["./app/*"],
+            "@tailwindcss/ui": ["./app/tailwind-ui/index.ts"],
+            "@tailwindcss/ui/*": ["./app/tailwind-ui/*"]
         }
     }
 }
