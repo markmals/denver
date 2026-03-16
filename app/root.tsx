@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from "react";
 
-import { isRouteErrorResponse, Outlet, Scripts } from "react-router";
+import { isRouteErrorResponse, Outlet } from "react-router";
 
 import type { Route } from "./+types/root";
 
@@ -18,7 +18,6 @@ export function Layout({ children }: PropsWithChildren) {
             </head>
             <body>
                 {children}
-                <Scripts />
             </body>
         </html>
     );

@@ -2,9 +2,6 @@
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "denver",
     "main": "workers/entry.rsc.tsx",
-    "assets": {
-        "directory": "./build/client"
-    },
     "services": [
         {
             "binding": "RSC",

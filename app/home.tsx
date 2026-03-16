@@ -1,7 +1,7 @@
 import { getCollection } from "sprinkles:content";
 
 export async function ServerComponent() {
-    let posts = await getCollection("posts");
+    let restaurants = await getCollection("restaurants");
 
     return (
         <main>
@@ -9,9 +9,9 @@ export async function ServerComponent() {
             <section>
                 <h2>Posts</h2>
                 <ul>
-                    {posts.map(post => (
-                        <li key={post.id}>
-                            <h3>{post.data.title}</h3>
+                    {restaurants.map(restaurant => (
+                        <li key={restaurant.id}>
+                            <h3>{restaurant.data.name}</h3>
                         </li>
                     ))}
                 </ul>

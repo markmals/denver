@@ -1,27 +1,14 @@
 import * as s from "@remix-run/data-schema";
 import { defineCollection } from "sprinkles:content";
 
-import { file, glob } from "../content-layer/loaders/index.ts";
+import { file } from "../content-layer/loaders/index.ts";
 
-let posts = defineCollection({
-    loader: glob({
-        pattern: "**/[^_]*.{md,mdx}",
-        base: "app/content/posts",
-    }),
-    schema: s.object({
-        title: s.string(),
-        description: s.string(),
-        publishedOn: s.string(),
-        isDraft: s.defaulted(s.boolean(), false),
-    }),
-});
-
-let settings = defineCollection({
-    loader: file("app/content/settings.jsonc"),
+let restaurants = defineCollection({
+    loader: file("app/content/restaurants.jsonc"),
     schema: s.object({
         id: s.string(),
-        label: s.string(),
+        name: s.string(),
     }),
 });
 
-export let collections = { posts, settings };
+export let collections = { restaurants };
