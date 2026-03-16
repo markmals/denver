@@ -16,7 +16,7 @@ export function Layout({ children }: PropsWithChildren) {
                 <link href={styles} rel="stylesheet" />
                 <link href="https://rsms.me/inter/inter.css" rel="stylesheet" />
                 <link href="favicon.png" rel="icon" type="image/png" />
-                <title>Denver</title>
+                <title>Denver Restaurants</title>
             </head>
             <body className="relative isolate flex min-h-svh w-full flex-col bg-gray-200 text-zinc-950 dark:bg-black dark:text-white">
                 <main className="flex flex-1 flex-col px-2 py-2">
