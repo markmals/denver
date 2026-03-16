@@ -1,12 +1,12 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "denver-ssr",
+    "name": "denver",
     "main": "workers/entry.ssr.tsx",
     "workers_dev": true,
     "services": [
         {
             "binding": "RSC",
-            "service": "denver"
+            "service": "denver-rsc"
         }
     ],
     "compatibility_date": "2026-02-28",

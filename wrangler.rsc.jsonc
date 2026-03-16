@@ -1,6 +1,6 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "denver",
+    "name": "denver-rsc",
     "main": "workers/entry.rsc.tsx",
     "workers_dev": true,
     "compatibility_date": "2026-02-28",
