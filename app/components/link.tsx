@@ -1,16 +1,23 @@
-import type { RemixNode } from "remix/component";
+import type { MixValue, RemixNode } from "remix/component";
 
 type LinkProps = {
     href: string;
     class?: string;
     target?: string;
     rel?: string;
+    mix?: MixValue<HTMLAnchorElement>;
     children: RemixNode;
 };
 
 export function Link() {
     return (props: LinkProps) => (
-        <a class={props.class} href={props.href} rel={props.rel} target={props.target}>
+        <a
+            class={props.class}
+            href={props.href}
+            mix={props.mix}
+            rel={props.rel}
+            target={props.target}
+        >
             {props.children}
         </a>
     );

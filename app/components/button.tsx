@@ -1,193 +1,474 @@
-import type { RemixNode } from "remix/component";
+import type { MixValue, RemixNode } from "remix/component";
 
-import { clsx } from "clsx";
+import { css } from "remix/component";
 
 import { Link } from "./link.tsx";
 
-let styles = {
-    base: [
-        "relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg border text-base/6",
-        "px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
-        "focus:outline-hidden focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500",
-        "disabled:text-black/35",
-        "*:data-[slot=icon]:-mx-0.5 *:data-[slot=icon]:my-0.5 *:data-[slot=icon]:size-5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:text-(--btn-icon,currentColor) sm:*:data-[slot=icon]:my-1 sm:*:data-[slot=icon]:size-4 forced-colors:[--btn-icon:ButtonText] forced-colors:hover:[--btn-icon:ButtonText]",
-    ],
-    solid: [
-        "font-semibold",
-        "border-transparent bg-(--btn-border)",
-        "dark:bg-(--btn-bg)",
-        "before:absolute before:inset-0 before:-z-10 before:rounded-[calc(var(--radius-lg)-1px)] before:bg-(--btn-bg)",
-        "before:shadow-sm",
-        "dark:before:hidden",
-        "dark:border-white/5",
-        "after:absolute after:inset-0 after:-z-10 after:rounded-[calc(var(--radius-lg)-1px)]",
-        "after:shadow-[inset_0_1px_--theme(--color-white/15%)]",
-        "active:after:bg-(--btn-hover-overlay) hover:after:bg-(--btn-hover-overlay)",
-        "dark:after:-inset-px dark:after:rounded-lg",
-        "disabled:before:shadow-none disabled:after:shadow-none",
-    ],
-    outline: [
-        "border-zinc-950/10 text-zinc-950 active:bg-zinc-950/2.5 hover:bg-zinc-950/2.5",
-        "font-semibold",
-        "dark:border-white/15 dark:text-white dark:[--btn-bg:transparent] dark:active:bg-white/5 dark:hover:bg-white/5",
-        "[--btn-icon:var(--color-zinc-500)] active:[--btn-icon:var(--color-zinc-700)] hover:[--btn-icon:var(--color-zinc-700)] dark:active:[--btn-icon:var(--color-zinc-400)] dark:hover:[--btn-icon:var(--color-zinc-400)]",
-    ],
-    plain: [
-        "border-transparent active:bg-zinc-950/5 hover:bg-zinc-950/5",
-        "font-normal",
-        "dark:active:bg-white/10 dark:hover:bg-white/10",
-        "[--btn-icon:currentColor]",
-    ],
-    colors: {
-        "dark/zinc": [
-            "text-white [--btn-bg:var(--color-zinc-900)] [--btn-border:var(--color-zinc-950)]/90 [--btn-hover-overlay:var(--color-white)]/10",
-            "dark:text-white dark:[--btn-bg:var(--color-zinc-600)] dark:[--btn-hover-overlay:var(--color-white)]/5",
-            "[--btn-icon:var(--color-zinc-400)] active:[--btn-icon:var(--color-zinc-300)] hover:[--btn-icon:var(--color-zinc-300)]",
-        ],
-        light: [
-            "text-zinc-950 [--btn-bg:white] [--btn-border:var(--color-zinc-950)]/10 [--btn-hover-overlay:var(--color-zinc-950)]/2.5 active:[--btn-border:var(--color-zinc-950)]/15 hover:[--btn-border:var(--color-zinc-950)]/15",
-            "dark:text-white dark:[--btn-hover-overlay:var(--color-white)]/5 dark:[--btn-bg:var(--color-zinc-800)]",
-            "[--btn-icon:var(--color-zinc-500)] active:[--btn-icon:var(--color-zinc-700)] hover:[--btn-icon:var(--color-zinc-700)] dark:[--btn-icon:var(--color-zinc-500)] dark:active:[--btn-icon:var(--color-zinc-400)] dark:hover:[--btn-icon:var(--color-zinc-400)]",
-        ],
-        "dark/white": [
-            "text-white [--btn-bg:var(--color-zinc-900)] [--btn-border:var(--color-zinc-950)]/90 [--btn-hover-overlay:var(--color-white)]/10",
-            "dark:text-zinc-950 dark:[--btn-bg:white] dark:[--btn-hover-overlay:var(--color-zinc-950)]/5",
-            "[--btn-icon:var(--color-zinc-400)] active:[--btn-icon:var(--color-zinc-300)] hover:[--btn-icon:var(--color-zinc-300)] dark:[--btn-icon:var(--color-zinc-500)] dark:active:[--btn-icon:var(--color-zinc-400)] dark:hover:[--btn-icon:var(--color-zinc-400)]",
-        ],
-        dark: [
-            "text-white [--btn-bg:var(--color-zinc-900)] [--btn-border:var(--color-zinc-950)]/90 [--btn-hover-overlay:var(--color-white)]/10",
-            "dark:[--btn-hover-overlay:var(--color-white)]/5 dark:[--btn-bg:var(--color-zinc-800)]",
-            "[--btn-icon:var(--color-zinc-400)] active:[--btn-icon:var(--color-zinc-300)] hover:[--btn-icon:var(--color-zinc-300)]",
-        ],
-        white: [
-            "text-zinc-950 [--btn-bg:white] [--btn-border:var(--color-zinc-950)]/10 [--btn-hover-overlay:var(--color-zinc-950)]/2.5 active:[--btn-border:var(--color-zinc-950)]/15 hover:[--btn-border:var(--color-zinc-950)]/15",
-            "dark:[--btn-hover-overlay:var(--color-zinc-950)]/5",
-            "[--btn-icon:var(--color-zinc-400)] active:[--btn-icon:var(--color-zinc-500)] hover:[--btn-icon:var(--color-zinc-500)]",
-        ],
-        zinc: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-zinc-600)] [--btn-border:var(--color-zinc-700)]/90",
-            "dark:[--btn-hover-overlay:var(--color-white)]/5",
-            "[--btn-icon:var(--color-zinc-400)] active:[--btn-icon:var(--color-zinc-300)] hover:[--btn-icon:var(--color-zinc-300)]",
-        ],
-        indigo: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-indigo-500)] [--btn-border:var(--color-indigo-600)]/90",
-            "[--btn-icon:var(--color-indigo-300)] active:[--btn-icon:var(--color-indigo-200)] hover:[--btn-icon:var(--color-indigo-200)]",
-        ],
-        cyan: [
-            "text-cyan-950 [--btn-bg:var(--color-cyan-300)] [--btn-border:var(--color-cyan-400)]/80 [--btn-hover-overlay:var(--color-white)]/25",
-            "[--btn-icon:var(--color-cyan-500)]",
-        ],
-        red: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-red-600)] [--btn-border:var(--color-red-700)]/90",
-            "[--btn-icon:var(--color-red-300)] active:[--btn-icon:var(--color-red-200)] hover:[--btn-icon:var(--color-red-200)]",
-        ],
-        orange: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-orange-500)] [--btn-border:var(--color-orange-600)]/90",
-            "[--btn-icon:var(--color-orange-300)] active:[--btn-icon:var(--color-orange-200)] hover:[--btn-icon:var(--color-orange-200)]",
-        ],
-        amber: [
-            "text-amber-950 [--btn-hover-overlay:var(--color-white)]/25 [--btn-bg:var(--color-amber-400)] [--btn-border:var(--color-amber-500)]/80",
-            "[--btn-icon:var(--color-amber-600)]",
-        ],
-        yellow: [
-            "text-yellow-950 [--btn-hover-overlay:var(--color-white)]/25 [--btn-bg:var(--color-yellow-300)] [--btn-border:var(--color-yellow-400)]/80",
-            "[--btn-icon:var(--color-yellow-600)] active:[--btn-icon:var(--color-yellow-700)] hover:[--btn-icon:var(--color-yellow-700)]",
-        ],
-        lime: [
-            "text-lime-950 [--btn-hover-overlay:var(--color-white)]/25 [--btn-bg:var(--color-lime-300)] [--btn-border:var(--color-lime-400)]/80",
-            "[--btn-icon:var(--color-lime-600)] active:[--btn-icon:var(--color-lime-700)] hover:[--btn-icon:var(--color-lime-700)]",
-        ],
-        green: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-green-600)] [--btn-border:var(--color-green-700)]/90",
-            "[--btn-icon:var(--color-white)]/60 active:[--btn-icon:var(--color-white)]/80 hover:[--btn-icon:var(--color-white)]/80",
-        ],
-        emerald: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-emerald-600)] [--btn-border:var(--color-emerald-700)]/90",
-            "[--btn-icon:var(--color-white)]/60 active:[--btn-icon:var(--color-white)]/80 hover:[--btn-icon:var(--color-white)]/80",
-        ],
-        teal: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-teal-600)] [--btn-border:var(--color-teal-700)]/90",
-            "[--btn-icon:var(--color-white)]/60 active:[--btn-icon:var(--color-white)]/80 hover:[--btn-icon:var(--color-white)]/80",
-        ],
-        sky: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-sky-500)] [--btn-border:var(--color-sky-600)]/80",
-            "[--btn-icon:var(--color-white)]/60 active:[--btn-icon:var(--color-white)]/80 hover:[--btn-icon:var(--color-white)]/80",
-        ],
-        blue: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-blue-600)] [--btn-border:var(--color-blue-700)]/90",
-            "[--btn-icon:var(--color-blue-400)] active:[--btn-icon:var(--color-blue-300)] hover:[--btn-icon:var(--color-blue-300)]",
-        ],
-        violet: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-violet-500)] [--btn-border:var(--color-violet-600)]/90",
-            "[--btn-icon:var(--color-violet-300)] active:[--btn-icon:var(--color-violet-200)] hover:[--btn-icon:var(--color-violet-200)]",
-        ],
-        purple: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-purple-500)] [--btn-border:var(--color-purple-600)]/90",
-            "[--btn-icon:var(--color-purple-300)] active:[--btn-icon:var(--color-purple-200)] hover:[--btn-icon:var(--color-purple-200)]",
-        ],
-        fuchsia: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-fuchsia-500)] [--btn-border:var(--color-fuchsia-600)]/90",
-            "[--btn-icon:var(--color-fuchsia-300)] active:[--btn-icon:var(--color-fuchsia-200)] hover:[--btn-icon:var(--color-fuchsia-200)]",
-        ],
-        pink: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-pink-500)] [--btn-border:var(--color-pink-600)]/90",
-            "[--btn-icon:var(--color-pink-300)] active:[--btn-icon:var(--color-pink-200)] hover:[--btn-icon:var(--color-pink-200)]",
-        ],
-        rose: [
-            "text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-rose-500)] [--btn-border:var(--color-rose-600)]/90",
-            "[--btn-icon:var(--color-rose-300)] active:[--btn-icon:var(--color-rose-200)] hover:[--btn-icon:var(--color-rose-200)]",
-        ],
+// Base button styles shared across all variants
+let baseStyle = css({
+    position: "relative",
+    isolation: "isolate",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "calc(var(--spacing) * 2)",
+    borderRadius: "var(--radius-lg)",
+    border: "1px solid transparent",
+    fontSize: "var(--text-base)",
+    lineHeight: "1.5rem",
+    paddingLeft: "calc(calc(var(--spacing) * 3.5) - 1px)",
+    paddingRight: "calc(calc(var(--spacing) * 3.5) - 1px)",
+    paddingTop: "calc(calc(var(--spacing) * 2.5) - 1px)",
+    paddingBottom: "calc(calc(var(--spacing) * 2.5) - 1px)",
+    "&:focus": {
+        outline: "none",
+    },
+    "&:focus-visible": {
+        outline: "2px solid var(--color-blue-500)",
+        outlineOffset: "2px",
+    },
+    "&:disabled": {
+        color: "rgb(0 0 0 / 35%)",
+    },
+    // Icon slot styling
+    "& [data-slot=icon]": {
+        marginLeft: "-0.125rem",
+        marginRight: "-0.125rem",
+        marginTop: "0.125rem",
+        marginBottom: "0.125rem",
+        width: "1.25rem",
+        height: "1.25rem",
+        flexShrink: 0,
+        color: "var(--btn-icon, currentColor)",
+    },
+    "@media (min-width: 40rem)": {
+        fontSize: "var(--text-sm)",
+        lineHeight: "1.5rem",
+        paddingLeft: "calc(calc(var(--spacing) * 3) - 1px)",
+        paddingRight: "calc(calc(var(--spacing) * 3) - 1px)",
+        paddingTop: "calc(calc(var(--spacing) * 1.5) - 1px)",
+        paddingBottom: "calc(calc(var(--spacing) * 1.5) - 1px)",
+        "& [data-slot=icon]": {
+            marginTop: "0.25rem",
+            marginBottom: "0.25rem",
+            width: "1rem",
+            height: "1rem",
+        },
+    },
+});
+
+// Solid variant - layered background with before/after pseudo-elements
+let solidStyle = css({
+    fontWeight: "var(--font-weight-semibold)",
+    borderColor: "transparent",
+    backgroundColor: "var(--btn-border)",
+    "&::before": {
+        content: '""',
+        position: "absolute",
+        inset: 0,
+        zIndex: -10,
+        borderRadius: "calc(var(--radius-lg) - 1px)",
+        backgroundColor: "var(--btn-bg)",
+        boxShadow: "var(--shadow-sm)",
+    },
+    "&::after": {
+        content: '""',
+        position: "absolute",
+        inset: 0,
+        zIndex: -10,
+        borderRadius: "calc(var(--radius-lg) - 1px)",
+        boxShadow: "inset 0 1px rgb(255 255 255 / 15%)",
+    },
+    "&:hover::after, &:active::after": {
+        backgroundColor: "var(--btn-hover-overlay)",
+    },
+    "&:disabled::before": {
+        boxShadow: "none",
+    },
+    "&:disabled::after": {
+        boxShadow: "none",
+    },
+    "@media (prefers-color-scheme: dark)": {
+        backgroundColor: "var(--btn-bg)",
+        borderColor: "rgb(255 255 255 / 5%)",
+        "&::before": {
+            display: "none",
+        },
+        "&::after": {
+            inset: "-1px",
+            borderRadius: "var(--radius-lg)",
+        },
+    },
+});
+
+// Outline variant
+let outlineStyle = css({
+    fontWeight: "var(--font-weight-semibold)",
+    borderColor: "rgb(0 0 0 / 10%)",
+    color: "var(--color-zinc-950)",
+    "--btn-icon": "var(--color-zinc-500)",
+    "&:hover, &:active": {
+        backgroundColor: "rgb(0 0 0 / 2.5%)",
+        "--btn-icon": "var(--color-zinc-700)",
+    },
+    "@media (prefers-color-scheme: dark)": {
+        borderColor: "rgb(255 255 255 / 15%)",
+        color: "var(--color-white)",
+        "--btn-bg": "transparent",
+        "&:hover, &:active": {
+            backgroundColor: "rgb(255 255 255 / 5%)",
+            "--btn-icon": "var(--color-zinc-400)",
+        },
+    },
+});
+
+// Plain variant
+let plainStyle = css({
+    borderColor: "transparent",
+    fontWeight: "var(--font-weight-normal)",
+    "--btn-icon": "currentColor",
+    "&:hover, &:active": {
+        backgroundColor: "rgb(0 0 0 / 5%)",
+    },
+    "@media (prefers-color-scheme: dark)": {
+        "&:hover, &:active": {
+            backgroundColor: "rgb(255 255 255 / 10%)",
+        },
+    },
+});
+
+// Color definitions - each maps to CSS custom property values
+// Format: [light text color, --btn-bg, --btn-border, --btn-hover-overlay, --btn-icon, hover/active --btn-icon, dark overrides...]
+type ColorConfig = {
+    color: string;
+    btnBg: string;
+    btnBorder: string;
+    btnHoverOverlay: string;
+    btnIcon: string;
+    btnIconHover?: string;
+    dark?: {
+        color?: string;
+        btnBg?: string;
+        btnHoverOverlay?: string;
+        btnIcon?: string;
+        btnIconHover?: string;
+    };
+};
+
+let COLOR_MAP: Record<string, ColorConfig> = {
+    "dark/zinc": {
+        color: "var(--color-white)",
+        btnBg: "var(--color-zinc-900)",
+        btnBorder: "rgb(from var(--color-zinc-950) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-zinc-400)",
+        btnIconHover: "var(--color-zinc-300)",
+        dark: {
+            color: "var(--color-white)",
+            btnBg: "var(--color-zinc-600)",
+            btnHoverOverlay: "rgb(255 255 255 / 5%)",
+        },
+    },
+    light: {
+        color: "var(--color-zinc-950)",
+        btnBg: "var(--color-white)",
+        btnBorder: "rgb(from var(--color-zinc-950) r g b / 10%)",
+        btnHoverOverlay: "rgb(from var(--color-zinc-950) r g b / 2.5%)",
+        btnIcon: "var(--color-zinc-500)",
+        btnIconHover: "var(--color-zinc-700)",
+        dark: {
+            color: "var(--color-white)",
+            btnBg: "var(--color-zinc-800)",
+            btnHoverOverlay: "rgb(255 255 255 / 5%)",
+            btnIcon: "var(--color-zinc-500)",
+            btnIconHover: "var(--color-zinc-400)",
+        },
+    },
+    "dark/white": {
+        color: "var(--color-white)",
+        btnBg: "var(--color-zinc-900)",
+        btnBorder: "rgb(from var(--color-zinc-950) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-zinc-400)",
+        btnIconHover: "var(--color-zinc-300)",
+        dark: {
+            color: "var(--color-zinc-950)",
+            btnBg: "var(--color-white)",
+            btnHoverOverlay: "rgb(from var(--color-zinc-950) r g b / 5%)",
+            btnIcon: "var(--color-zinc-500)",
+            btnIconHover: "var(--color-zinc-400)",
+        },
+    },
+    dark: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-zinc-900)",
+        btnBorder: "rgb(from var(--color-zinc-950) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-zinc-400)",
+        btnIconHover: "var(--color-zinc-300)",
+        dark: {
+            btnBg: "var(--color-zinc-800)",
+            btnHoverOverlay: "rgb(255 255 255 / 5%)",
+        },
+    },
+    white: {
+        color: "var(--color-zinc-950)",
+        btnBg: "var(--color-white)",
+        btnBorder: "rgb(from var(--color-zinc-950) r g b / 10%)",
+        btnHoverOverlay: "rgb(from var(--color-zinc-950) r g b / 2.5%)",
+        btnIcon: "var(--color-zinc-400)",
+        btnIconHover: "var(--color-zinc-500)",
+        dark: {
+            btnHoverOverlay: "rgb(from var(--color-zinc-950) r g b / 5%)",
+        },
+    },
+    zinc: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-zinc-600)",
+        btnBorder: "rgb(from var(--color-zinc-700) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-zinc-400)",
+        btnIconHover: "var(--color-zinc-300)",
+        dark: {
+            btnHoverOverlay: "rgb(255 255 255 / 5%)",
+        },
+    },
+    indigo: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-indigo-500)",
+        btnBorder: "rgb(from var(--color-indigo-600) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-indigo-300)",
+        btnIconHover: "var(--color-indigo-200)",
+    },
+    cyan: {
+        color: "var(--color-cyan-950)",
+        btnBg: "var(--color-cyan-300)",
+        btnBorder: "rgb(from var(--color-cyan-400) r g b / 80%)",
+        btnHoverOverlay: "rgb(255 255 255 / 25%)",
+        btnIcon: "var(--color-cyan-500)",
+    },
+    red: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-red-600)",
+        btnBorder: "rgb(from var(--color-red-700) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-red-300)",
+        btnIconHover: "var(--color-red-200)",
+    },
+    orange: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-orange-500)",
+        btnBorder: "rgb(from var(--color-orange-600) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-orange-300)",
+        btnIconHover: "var(--color-orange-200)",
+    },
+    amber: {
+        color: "var(--color-amber-950)",
+        btnBg: "var(--color-amber-400)",
+        btnBorder: "rgb(from var(--color-amber-500) r g b / 80%)",
+        btnHoverOverlay: "rgb(255 255 255 / 25%)",
+        btnIcon: "var(--color-amber-600)",
+    },
+    yellow: {
+        color: "var(--color-yellow-950)",
+        btnBg: "var(--color-yellow-300)",
+        btnBorder: "rgb(from var(--color-yellow-400) r g b / 80%)",
+        btnHoverOverlay: "rgb(255 255 255 / 25%)",
+        btnIcon: "var(--color-yellow-600)",
+        btnIconHover: "var(--color-yellow-700)",
+    },
+    lime: {
+        color: "var(--color-lime-950)",
+        btnBg: "var(--color-lime-300)",
+        btnBorder: "rgb(from var(--color-lime-400) r g b / 80%)",
+        btnHoverOverlay: "rgb(255 255 255 / 25%)",
+        btnIcon: "var(--color-lime-600)",
+        btnIconHover: "var(--color-lime-700)",
+    },
+    green: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-green-600)",
+        btnBorder: "rgb(from var(--color-green-700) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "rgb(255 255 255 / 60%)",
+        btnIconHover: "rgb(255 255 255 / 80%)",
+    },
+    emerald: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-emerald-600)",
+        btnBorder: "rgb(from var(--color-emerald-700) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "rgb(255 255 255 / 60%)",
+        btnIconHover: "rgb(255 255 255 / 80%)",
+    },
+    teal: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-teal-600)",
+        btnBorder: "rgb(from var(--color-teal-700) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "rgb(255 255 255 / 60%)",
+        btnIconHover: "rgb(255 255 255 / 80%)",
+    },
+    sky: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-sky-500)",
+        btnBorder: "rgb(from var(--color-sky-600) r g b / 80%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "rgb(255 255 255 / 60%)",
+        btnIconHover: "rgb(255 255 255 / 80%)",
+    },
+    blue: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-blue-600)",
+        btnBorder: "rgb(from var(--color-blue-700) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-blue-400)",
+        btnIconHover: "var(--color-blue-300)",
+    },
+    violet: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-violet-500)",
+        btnBorder: "rgb(from var(--color-violet-600) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-violet-300)",
+        btnIconHover: "var(--color-violet-200)",
+    },
+    purple: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-purple-500)",
+        btnBorder: "rgb(from var(--color-purple-600) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-purple-300)",
+        btnIconHover: "var(--color-purple-200)",
+    },
+    fuchsia: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-fuchsia-500)",
+        btnBorder: "rgb(from var(--color-fuchsia-600) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-fuchsia-300)",
+        btnIconHover: "var(--color-fuchsia-200)",
+    },
+    pink: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-pink-500)",
+        btnBorder: "rgb(from var(--color-pink-600) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-pink-300)",
+        btnIconHover: "var(--color-pink-200)",
+    },
+    rose: {
+        color: "var(--color-white)",
+        btnBg: "var(--color-rose-500)",
+        btnBorder: "rgb(from var(--color-rose-600) r g b / 90%)",
+        btnHoverOverlay: "rgb(255 255 255 / 10%)",
+        btnIcon: "var(--color-rose-300)",
+        btnIconHover: "var(--color-rose-200)",
     },
 };
 
+type CSSProps = Parameters<typeof css>[0];
+
+// Build a css() mixin for a given color config
+function colorStyle(config: ColorConfig) {
+    let style: CSSProps = {
+        color: config.color,
+        "--btn-bg": config.btnBg,
+        "--btn-border": config.btnBorder,
+        "--btn-hover-overlay": config.btnHoverOverlay,
+        "--btn-icon": config.btnIcon,
+    };
+
+    if (config.btnIconHover) {
+        style["&:hover, &:active"] = {
+            "--btn-icon": config.btnIconHover,
+        };
+    }
+
+    if (config.dark) {
+        let darkStyle: CSSProps = {};
+        if (config.dark.color) darkStyle.color = config.dark.color;
+        if (config.dark.btnBg) darkStyle["--btn-bg"] = config.dark.btnBg;
+        if (config.dark.btnHoverOverlay)
+            darkStyle["--btn-hover-overlay"] = config.dark.btnHoverOverlay;
+        if (config.dark.btnIcon) darkStyle["--btn-icon"] = config.dark.btnIcon;
+        if (config.dark.btnIconHover) {
+            darkStyle["&:hover, &:active"] = {
+                "--btn-icon": config.dark.btnIconHover,
+            };
+        }
+        style["@media (prefers-color-scheme: dark)"] = darkStyle;
+    }
+
+    return css(style);
+}
+
+// Pre-compute all color styles
+let colorStyles = Object.fromEntries(
+    Object.entries(COLOR_MAP).map(([name, config]) => [name, colorStyle(config)]),
+) as Record<keyof typeof COLOR_MAP, ReturnType<typeof css>>;
+
+let cursorDefaultStyle = css({
+    cursor: "default",
+});
+
+type ButtonColor = keyof typeof COLOR_MAP;
+
 type ButtonProps = (
-    | { color?: keyof typeof styles.colors; outline?: never; plain?: never }
+    | { color?: ButtonColor; outline?: never; plain?: never }
     | { color?: never; outline: true; plain?: never }
     | { color?: never; outline?: never; plain: true }
 ) & {
-    class?: string;
+    mix?: MixValue<Element>;
     children: RemixNode;
-} & (({ href: string } & Record<string, unknown>) | Record<string, unknown>);
+} & ({ href: string; target?: string; rel?: string } | { href?: never });
 
 export function Button() {
     return (props: ButtonProps) => {
-        let classes = clsx(
-            props.class,
-            styles.base,
-            props.outline
-                ? styles.outline
-                : props.plain
-                  ? styles.plain
-                  : clsx(styles.solid, styles.colors[props.color ?? "dark/zinc"]),
-        );
+        let variantMixin = props.outline
+            ? outlineStyle
+            : props.plain
+              ? plainStyle
+              : [solidStyle, colorStyles[props.color ?? "dark/zinc"]];
 
-        if ("href" in props && props.href) {
+        let mixins = props.mix
+            ? [baseStyle, variantMixin, props.mix].flat()
+            : [baseStyle, variantMixin].flat();
+
+        if (props.href) {
             return (
-                <Link
-                    class={classes}
-                    href={props.href as string}
-                    target={(props as Record<string, unknown>).target as string | undefined}
-                >
+                <Link href={props.href} mix={mixins} target={props.target}>
                     <TouchTarget>{props.children}</TouchTarget>
                 </Link>
             );
         }
 
         return (
-            <button class={clsx(classes, "cursor-default")} type="button">
+            <button mix={[...mixins, cursorDefaultStyle]} type="button">
                 <TouchTarget>{props.children}</TouchTarget>
             </button>
         );
     };
 }
 
+let touchTargetStyle = css({
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: "max(100%, 2.75rem)",
+    height: "max(100%, 2.75rem)",
+    transform: "translate(-50%, -50%)",
+    "@media (pointer: fine)": {
+        display: "none",
+    },
+});
+
 export function TouchTarget() {
     return (props: { children: RemixNode }) => (
         <>
-            <span
-                aria-hidden="true"
-                class="absolute top-1/2 left-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2 pointer-fine:hidden"
-            />
+            <span aria-hidden="true" mix={[touchTargetStyle]} />
             {props.children}
         </>
     );

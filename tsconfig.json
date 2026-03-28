@@ -16,7 +16,7 @@
         "jsx": "react-jsx",
         "jsxImportSource": "remix/component",
         "paths": {
-            "~/*": ["./app/*"],
+            "~/*": ["./app/*"]
         }
     }
 }

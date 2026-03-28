@@ -1,16 +1,32 @@
-import type { RemixNode } from "remix/component";
 import type { Controller } from "remix/fetch-router";
 
 import assert from "node:assert";
+import { css, type RemixNode } from "remix/component";
 import { getCollection, getEntry, render } from "sprinkles:content";
 
 import icons from "~/assets/icons.svg?url";
-import styles from "~/assets/tailwind.css?url";
+import preflight from "~/assets/preflight.css?url";
+import theme from "~/assets/theme.css?url";
 import { Button } from "~/components/button.tsx";
 import { Divider } from "~/components/divider.tsx";
 import { Heading } from "~/components/heading.tsx";
+import { routes } from "~/entry.server.tsx";
 import { document } from "~/lib/render.tsx";
-import { routes } from "~/routes.ts";
+
+import {
+    addressLinkStyle,
+    bodyStyle,
+    cardStyle,
+    contentStyle,
+    imageContainerStyle,
+    imageWrapperStyle,
+    listItemStyle,
+    listStyle,
+    mainStyle,
+    rowStyle,
+    subtextStyle,
+    titleStyle,
+} from "./styles.ts";
 
 export default {
     actions: {
@@ -32,20 +48,27 @@ export default {
                         <meta charset="utf-8" />
                         <meta content="width=device-width, initial-scale=1" name="viewport" />
                         <meta content="#000000" name="theme-color" />
-                        <link href={styles} rel="stylesheet" />
+                        <link href={preflight} rel="stylesheet" />
+                        <link href={theme} rel="stylesheet" />
                         <link href="https://rsms.me/inter/inter.css" rel="stylesheet" />
                         <link href="favicon.png" rel="icon" type="image/png" />
                         {import.meta.env.DEV && <script async src="/@vite/client" type="module" />}
                         <title>Denver Restaurants</title>
                     </head>
-                    <body class="relative isolate flex min-h-svh w-full flex-col bg-gray-200 text-zinc-950 dark:bg-black dark:text-white">
-                        <main class="flex flex-1 flex-col px-2 py-2">
-                            <div class="grow rounded-lg bg-white p-10 shadow-xs ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
-                                <div class="mx-auto max-w-6xl">
-                                    <div class="flex flex-col gap-4">
+                    <body mix={bodyStyle}>
+                        <main mix={mainStyle}>
+                            <div mix={cardStyle}>
+                                <div mix={css({ marginInline: "auto", maxWidth: "72rem" })}>
+                                    <div
+                                        mix={css({
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "calc(var(--spacing) * 4)",
+                                        })}
+                                    >
                                         <Heading>Denver Restaurants</Heading>
                                         <Divider />
-                                        <ul class="flex flex-col border-black/15 *:border-b *:last:border-none dark:border-white/15">
+                                        <ul mix={listStyle}>
                                             {items.map(item => (
                                                 <ListItem {...item.data} content={item.content} />
                                             ))}
@@ -62,7 +85,7 @@ export default {
 } satisfies Controller<typeof routes>;
 
 function Icon() {
-    return (props: { name: string; size?: number; class?: string }) => {
+    return (props: { name: string; size?: number }) => {
         let size = props.size ?? 24;
         return (
             <svg aria-hidden="true" data-slot="icon" height={size} width={size}>
@@ -85,27 +108,45 @@ function ListItem() {
     return (props: ListItemProps) => {
         let { content: Content } = props;
         return (
-            <li class="border-black/15 py-6 first-of-type:pt-0! dark:border-white/15">
-                <div class="flex flex-col items-start gap-6 md:flex-row">
-                    <div class="relative w-full md:w-auto">
-                        <div class="block aspect-3/2 w-full overflow-hidden rounded-lg bg-black/10 md:aspect-square md:w-52 dark:bg-white/10">
-                            <img alt="" class="size-full object-cover" src={props.thumbnail} />
+            <li mix={listItemStyle}>
+                <div mix={rowStyle}>
+                    <div mix={imageWrapperStyle}>
+                        <div mix={imageContainerStyle}>
+                            <img
+                                alt=""
+                                mix={css({
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                })}
+                                src={props.thumbnail}
+                            />
                         </div>
                     </div>
-                    <div class="flex w-full flex-col justify-between gap-2 overflow-hidden">
-                        <div class="flex flex-col gap-2">
-                            <div class="flex flex-col gap-1">
-                                <h2 class="text-xl font-medium text-black/95 md:truncate dark:text-white/95">
-                                    {props.name}
-                                </h2>
-                                <div class="text-sm text-black/70 dark:text-white/70">
-                                    <span class="inline-block text-wrap">
+                    <div mix={contentStyle}>
+                        <div
+                            mix={css({
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "calc(var(--spacing) * 2)",
+                            })}
+                        >
+                            <div
+                                mix={css({
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "calc(var(--spacing) * 1)",
+                                })}
+                            >
+                                <h2 mix={titleStyle}>{props.name}</h2>
+                                <div mix={subtextStyle}>
+                                    <span mix={css({ display: "inline-block", textWrap: "wrap" })}>
                                         {props.cuisine} •{" "}
                                         <a
-                                            class="underline hover:text-blue-500 dark:hover:text-blue-400"
                                             href={`https://www.google.com/maps/dir/?api=1&destination=${props.address
                                                 .split(" ")
                                                 .join("+")}`}
+                                            mix={[addressLinkStyle]}
                                             target="_blank"
                                         >
                                             {props.address}
@@ -113,15 +154,20 @@ function ListItem() {
                                     </span>
                                 </div>
                             </div>
-                            <div class="text-sm text-black/70 dark:text-white/70">
+                            <div mix={subtextStyle}>
                                 <Content />
                             </div>
                         </div>
                         <div>
                             {props.menu !== undefined && (
                                 <Button
-                                    class="text-blue-500 dark:text-blue-400"
                                     href={props.menu}
+                                    mix={css({
+                                        color: "var(--color-blue-500)",
+                                        "@media (prefers-color-scheme: dark)": {
+                                            color: "var(--color-blue-400)",
+                                        },
+                                    })}
                                     plain
                                     target="_blank"
                                 >

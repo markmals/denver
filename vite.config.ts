@@ -1,6 +1,5 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
 import mdx from "@mdx-js/rollup";
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite-plus";
 
 import { contentLayer } from "./content-layer/plugin.ts";
@@ -164,7 +163,6 @@ export default defineConfig({
                     name: "ssr",
                 },
             }),
-        tailwindcss(),
     ],
     resolve: {
         tsconfigPaths: true,
