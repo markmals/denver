@@ -1,10 +1,7 @@
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { Divider, Heading, Button } from "@tailwindcss/ui";
-import { clsx } from "clsx";
 import assert from "node:assert";
 import { getCollection, getEntry, render } from "sprinkles:content";
-
-const VISITED = ["cucina-bella"];
 
 export async function ServerComponent() {
     let restaurants = await getCollection("restaurants");
@@ -27,15 +24,9 @@ async function ListItem({ id }: { id: string }) {
     assert(entry, `Could not find entry for slug: ${id}`);
     let { Content } = await render(entry);
 
-    let hasVisited = VISITED.includes(entry.id);
-
     return (
         <li className="border-black/15 py-6 first-of-type:pt-0! dark:border-white/15">
-            <div
-                className={clsx("flex flex-col items-start gap-6 md:flex-row", {
-                    "opacity-30": hasVisited,
-                })}
-            >
+            <div className="flex flex-col items-start gap-6 md:flex-row">
                 <div className="relative w-full md:w-auto">
                     <div className="aspect-3/2 md:aspect-square block w-full overflow-hidden rounded-lg bg-black/10 md:w-52 dark:bg-white/10">
                         <img alt="" className="size-full object-cover" src={entry.data.thumbnail} />
