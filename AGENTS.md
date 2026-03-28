@@ -1,488 +1,78 @@
 # Contributor Guidelines
 
-## Technology Overview
+## Remix Documentation
 
-- **Development runtime**: Node.js (v24)
-- **Package manager**: pnpm
-- **Toolchain**: Vite+ (`vp`)
-- **Bundler**: Vite 8 (with Rolldown)
-- **JavaScript framework**: React 19
-- **Meta-framework**: React Router
-- **Rendering**: React Server Components (RSC)
-- **Content**: Content-layer plugin with MDX
-- **Styling**: Tailwind CSS v4
-- **Formatter**: Oxfmt
-- **Linter**: Oxlint
-- **Deployment runtime**: Cloudflare `workerd`
+This repository contains a comprehensive overview of the Remix Component API, its runtime behavior, and practical use cases for building interactive UIs, as well as documentation on various other sub-packages included within the `remix` package. We are using a nightly of the `remix` package which has newly-added support for server-side rendering components, hydrating components, and the Remix `<Frame>` primitive.
 
-## Common Commands
-
-- Dev server: `vp dev` (**NEVER** run this yourself)
-- Build: `vp build`
-- Format: `vp fmt`
-- Lint: `vp lint`
-- Typecheck: `vp run typecheck`
-- Project check: `vp check`
-- Tests: `vp test`
+> Take a look at the files in `./docs/*.md` for detailed documentation on the many functions of the `remix` component API.
 
 ## Debugging Approach
 
 - Use `console.log` with clear prefixes during development
 - **NEVER** attempt to run the dev server yourself
-- If you need to debug, add `console.log` statements, tell the user where to look for the output (client, server, both, etc.), and they will paste back the results
+- If you need to do some debugging, add some `console.log` statements, tell me where I need to look for the `console.log` statements when I run the project myself (client, server, both, somewhere else, etc.), and then I will come back and paste the results of the `console.log` statements for you
+
+## Toolchain
+
+This project uses **Vite+** (Vite 8 + Rolldown) as its unified toolchain. All commands go through `vp`:
+
+- `vp dev` — start the dev server
+- `vp build` — production build to `dist/client` and `dist/ssr`
+- `vp preview` — preview the production build
+- `vp fmt` — format code with Oxfmt
+- `vp lint` — lint code with Oxlint
+- `vp check` — run format, lint, and typecheck together
+- `vp install` / `vp add` / `vp remove` — package management (delegates to pnpm)
+
+Configuration for formatting, linting, and build lives in `vite.config.ts`. There is no separate linter or formatter config file.
 
 ## Node.js
 
 - Always use the `node:` prefix for Node built-in module imports
-- Format code with `vp fmt` before committing
-- Run `vp run typecheck` and fix all info, warnings, and errors
+- Format and lint code with `vp fmt` and `vp lint` before committing
+- Run `vp check` and fix all info, warnings, and errors
 - Prefer `unknown` over `any` unless absolutely necessary
 - Use JSDoc/TSDoc comments for public APIs
 - Document important lines of code with a single line comment
-- Prefer `jsr:@std/*` for standard library packages
+- Prefer `jsr:@std/*` for standard library
+    - JSR packages can be installed using `vp add jsr:package-name`
 - Use relative imports for local modules
-- Prefer import aliases (`~/*`) over deep relative imports
-- Validate environment variables at startup using `node:assert`
-
-## React 19
-
-### Document Metadata in Components
-
-React 19 supports rendering `<title>`, `<meta>`, and `<link>` tags directly inside components. React hoists them to `<head>` automatically:
-
-```tsx
-export function ProductPage({ product }) {
-    return (
-        <>
-            <title>`${product.name} | Store`</title>
-            <meta name="description" content={product.description} />
-            <link rel="canonical" href={`/products/${product.id}`} />
-            <main>
-                <h1>{product.name}</h1>
-            </main>
-        </>
-    );
-}
-```
-
-### `use()` for Reading Promises and Context
-
-`use()` reads the value of a promise or context. Unlike hooks, `use()` can be called inside loops and conditionals:
-
-```tsx
-import { use } from "react";
-
-// Reading a promise (suspends until resolved)
-function ProductDetails({ productPromise }) {
-    let product = use(productPromise);
-    return <h1>{product.name}</h1>;
-}
-
-// With TanStack Query, use useQuery alongside use() for query promises:
-import { useQuery } from "@tanstack/react-query";
-
-function ProductDetails({ queryOptions }) {
-    let { promise } = useQuery(queryOptions);
-    let product = use(promise);
-
-    return <h1>{product.name}</h1>;
-}
-
-// Reading data from a server component in a client component:
-// Server component passes a promise as a prop
-export async function ServerComponent() {
-    let dataPromise = fetchData(); // Don't await - pass as promise
-    return <ClientDisplay dataPromise={dataPromise} />;
-}
-
-// Client component uses use() to read it
-("use client");
-function ClientDisplay({ dataPromise }) {
-    let data = use(dataPromise);
-    return <div>{data.value}</div>;
-}
-```
-
-### `useActionState()` for Form Actions
-
-`useActionState()` manages form submission state with automatic pending tracking:
-
-```tsx
-"use client";
-
-import { useActionState } from "react";
-
-function LoginForm() {
-    let [state, action, isPending] = useActionState(
-        async (prevState, formData: FormData) => {
-            let result = await login(formData);
-            if (result.error) return { error: result.error };
-            return { success: true };
-        },
-        { error: null },
-    );
-
-    return (
-        <form action={action}>
-            <input name="email" type="email" />
-            <input name="password" type="password" />
-            {state.error && <p>{state.error}</p>}
-            <button disabled={isPending} type="submit">
-                {isPending ? "Logging in..." : "Log in"}
-            </button>
-        </form>
-    );
-}
-```
-
-### `useOptimistic()` for Optimistic Updates
-
-`useOptimistic()` shows a temporary state while an async action is pending:
-
-```tsx
-"use client";
-
-import { useOptimistic, useActionState } from "react";
-
-function CartItem({ item, updateQuantity }) {
-    let [optimisticQuantity, setOptimisticQuantity] = useOptimistic(
-        item.quantity,
-        (_current, newQuantity: number) => newQuantity,
-    );
-
-    let [, action, isPending] = useActionState(async (_prev, formData: FormData) => {
-        let newQuantity = Number(formData.get("quantity"));
-        setOptimisticQuantity(newQuantity);
-        return updateQuantity(item.id, newQuantity);
-    }, null);
-
-    return (
-        <form action={action}>
-            <input defaultValue={optimisticQuantity} name="quantity" type="number" />
-            <span style={{ opacity: isPending ? 0.5 : 1 }}>{item.name}</span>
-        </form>
-    );
-}
-```
-
-### `<form action={fn}>` for Direct Form Actions
-
-React 19 allows passing a function directly to a form's `action` prop. This works with both client functions and server actions:
-
-```tsx
-// Client-side action
-function SearchForm() {
-    let navigate = useNavigate();
-
-    async function handleSearch(formData: FormData) {
-        let query = formData.get("q") as string;
-        navigate(`/search?q=${query}`);
-    }
-
-    return (
-        <form action={handleSearch}>
-            <input name="q" placeholder="Search..." type="search" />
-            <button type="submit">Search</button>
-        </form>
-    );
-}
-
-// Server action (RSC)
-export async function ServerComponent() {
-    async function createItem(formData: FormData) {
-        "use server";
-        let name = formData.get("name") as string;
-        await db.insert({ name });
-        redirect("/items");
-    }
-
-    return (
-        <form action={createItem}>
-            <input name="name" />
-            <button type="submit">Create</button>
-        </form>
-    );
-}
-```
-
-## React Router
-
-### Critical Package Guidelines
-
-**Use these packages:**
-
-- `react-router` - Main package for routing components and hooks
-- `@react-router/dev` - Development tools and route configuration
-- `@cloudflare/vite-plugin` - Cloudflare server adapter
-
-**NEVER use these packages:**
-
-- `react-router-dom` - Legacy package, use `react-router` instead
-- `@remix-run/*` - Old packages, replaced by `@react-router/*`
-- React Router v6 patterns - Completely different architecture
-
-### Hooks
-
-These hooks are acceptable when needed:
-
-- `useLocation`, `useNavigation`, `useNavigate`
-- `useParams`, `useSearchParams`
-- `useSubmit` (for `GET` actions only)
-- `useMatch` / `useMatches`
-- `useRevalidator`
-
-**NEVER use these hooks** (data should flow through loaders, actions, and server components instead):
-
-- `useLoaderData`, `useActionData`
-- `useAsyncValue`, `useAsyncError`
-- `useFormAction`
-- `useFetcher`
-
-### Route Configuration (`app/routes.ts`)
-
-```tsx
-import { type RouteConfig, index, route } from "@react-router/dev/routes";
-
-export default [
-    index("routes/home.tsx"),
-    route("about", "routes/about.tsx"),
-    route("products/:id", "routes/product.tsx", [
-        index("routes/product-overview.tsx"),
-        route("reviews", "routes/product-reviews.tsx"),
-    ]),
-] satisfies RouteConfig;
-```
-
-### Route Type Imports
-
-**ALWAYS use `./+types/[routeName]` for route type imports.**
-
-```tsx
-// CORRECT - always use this pattern:
-import type { Route } from "./+types/product-details";
-
-// WRONG - NEVER use relative parent paths:
-// import type { Route } from "../+types/product-details";
-```
-
-**If you see TypeScript errors about missing `./+types/[routeName]` modules:**
-
-1. **IMMEDIATELY run `vp run typecheck`** to generate the types
-2. **Or run `vp run typegen:react-router`** to generate types
-3. **NEVER try to "fix" it by changing the import path**
-
-Types are generated by `@react-router/dev` in `./+types/[routeName]` relative to each route file. The dev server also generates types automatically if the user is running it.
-
-### Type-Safe URL Generation with `href()`
-
-```tsx
-import { Link, href } from "react-router";
-
-// Static routes
-<Link to={href("/products/new")}>New Product</Link>
-
-// Dynamic routes - automatic type safety
-<Link to={href("/products/:id", { id: product.id })}>View</Link>
-
-// Works with redirects too
-return redirect(href("/products/:id", { id: newProduct.id }));
-
-// NEVER manually construct URLs:
-// <Link to={`/products/${product.id}`}>Product</Link> // WRONG
-```
-
-### Route Module Pattern (RSC)
-
-Routes export `ServerComponent` instead of `default`. All route components (`ServerComponent`, `ErrorBoundary`, `HydrateFallback`, `Layout`) are server components.
-
-```tsx
-import type { Route } from "./+types/route";
-import { Outlet } from "react-router";
-
-export async function ServerComponent({ loaderData, params }: Route.ComponentProps) {
-    let product = await getProduct(params.id);
-
-    async function buyProduct(formData: FormData) {
-        "use server";
-        await updateProduct(formData);
-        return redirect(href("/products/:id", { id: params.id }));
-    }
-
-    return (
-        <form action={buyProduct}>
-            <h2>{product.name}</h2>
-            <button type="submit">Buy Now</button>
-        </form>
-    );
-}
-```
-
-For client interactivity, extract to `"use client"` modules:
-
-```tsx
-// counter.tsx
-"use client";
-
-import { useState } from "react";
-
-export function Counter() {
-    let [count, setCount] = useState(0);
-    return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;
-}
-```
-
-```tsx
-// route.tsx
-import { Counter } from "./counter.tsx";
-
-export function ServerComponent() {
-    return (
-        <>
-            <h1>Counter</h1>
-            <Counter />
-        </>
-    );
-}
-```
-
-### `.server`/`.client` Module Naming
-
-Support for `.server.ts(x)` and `.client.ts(x)` file naming is **not supported** in RSC Framework Mode. Use the `"server-only"` and `"client-only"` side-effect imports instead:
-
-```ts
-// app/utils/db.ts
-import "server-only";
-
-// This module will cause a build error if accidentally imported on the client
-```
-
-> `@vitejs/plugin-rsc` handles these imports internally — the `server-only` and `client-only` npm packages do not need to be installed.
-
-### MDX Route Support
-
-MDX routes are supported with `@mdx-js/rollup` v3.1.1+. Components exported from MDX routes must be valid in RSC environments (no client hooks). Extract interactive components to `"use client"` modules.
-
-### Unsupported RSC Config Options
-
-The following `react-router.config.ts` options are not yet supported in RSC Framework Mode:
-
-- `buildEnd`, `prerender`, `presets`, `routeDiscovery`, `serverBundles`
-- `ssr: false` (SPA Mode)
-- `future.unstable_splitRouteModules`, `future.unstable_subResourceIntegrity`
-
-### Layout Routes with `<Outlet />`
-
-For layout routes that have child routes, **ALWAYS** use `<Outlet />` to render child routes:
-
-```tsx
-import { Outlet } from "react-router";
-
-export function ServerComponent() {
-    return (
-        <div className="layout">
-            <nav>{/* Navigation */}</nav>
-            <main>
-                <Outlet />
-            </main>
-        </div>
-    );
-}
-```
-
-### Error Boundaries
-
-Only set up `ErrorBoundary` for routes if the user explicitly asks. All errors bubble up to the `ErrorBoundary` in `root.tsx` by default.
-
-```tsx
-import { isRouteErrorResponse } from "react-router";
-
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-    if (isRouteErrorResponse(error)) {
-        return (
-            <div>
-                <h1>
-                    {error.status} {error.statusText}
-                </h1>
-                <p>{error.data}</p>
-            </div>
-        );
-    }
-
-    return (
-        <div>
-            <h1>Oops!</h1>
-            <p>{error.message}</p>
-        </div>
-    );
-}
-```
-
-### File Organization
-
-React Router uses **explicit route configuration** in `app/routes.ts`. You are NOT constrained by file-based routing conventions. Use descriptive, kebab-case file names organized by feature.
-
-### Correct Imports
-
-```tsx
-import { Link, Form, Outlet, NavLink } from "react-router";
-import { type RouteConfig, index, route } from "@react-router/dev/routes";
-import { data, redirect, href } from "react-router";
-```
+- Prefer import aliases over relative imports for local modules
+- Validate environment variables at startup using `jsr:@std/assert`
 
 ## General Rules
 
 ### Correctness
 
-- Remove anything that isn't used - unused imports, parameters, and members
-- Exhaust every hook dependency in React hook dependency arrays
-- Call React hooks only at the top level of a component (never in loops, conditions, or nested functions)
-- Use only valid CSS selectors - real pseudo-classes, pseudo-elements, and type selectors only
+- **Remove anything that isn't used** – delete unused imports, function parameters, and private class members.
+- **Use only real selectors** – in CSS, reference valid pseudo-classes, pseudo-elements, and type selectors only.
 
 ### Suspicious Code
 
-- Skip the `any` shortcut - prefer precise TypeScript types
-- Hands off `document.cookie` - manipulating cookies directly is forbidden; use React Router's cookie utilities instead
+- **Skip the "any" shortcut** – prefer precise TypeScript types.
+- **Hands off `document.cookie`** – manipulating cookies directly is forbidden. Use Remix's cookie utilities instead.
 
 ### Performance
 
-- Compile regexes once - declare regular expressions at module scope, not inside hot functions
+- **Compile regexes once** – declare regular expressions at module scope, not inside hot functions.
 
 ### Style & Consistency
 
-- Stick to ES modules - no `require` or CommonJS patterns
-- Prefer `import type` for type-only imports
-- Use `node:` protocol for Node.js built-in imports
-- Use `T[]` shorthand array syntax
-- Don't reassign function parameters
-- Favor `let` over `const` for bindings, unless declaring a top-level constant with ALL_CAPS
-- One `let` per line - declare variables individually
-- Skip non-null assertions - rewrite code so `!` isn't necessary
-- Avoid `enum` - choose unions, objects, or literal types
-- Use `trimStart`/`trimEnd` instead of `trimLeft`/`trimRight`
-- Default parameters go last
-- Self-close empty JSX elements (`<Component />` not `<Component></Component>`)
-- Export only the component and whitelisted helpers (`loader`, `action`, `meta`, etc.) from route files
-- No unused template literals - convert to quotes if not interpolating
-- Use `slice` instead of `substr`
-- Flatten simple `if`/`else if` chains
-- Kill useless `else` blocks when the `if` branch returns or throws
-- Leverage `as const` for immutability where appropriate
-
-## Using Vite+
-
-This project uses Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`.
-
-### Common Pitfalls
-
-- **Using the package manager directly:** Do not use pnpm, npm, or Yarn directly. Vite+ handles all package manager operations.
-- **Always use Vite commands to run tools:** Don't attempt to run `vp vitest` or `vp oxlint`. Use `vp test` and `vp lint` instead.
-- **Running scripts:** Vite+ commands take precedence over `package.json` scripts. If there is a conflict, run scripts using `vp run <script>`.
-- **Do not install Vitest, Oxlint, Oxfmt, or tsdown directly:** Vite+ wraps these tools.
-- **Use vpx for one-off binaries:** Use `vpx` instead of `npx`, `pnpm dlx`, or `vp dlx`.
-- **Import from `vite-plus`:** Instead of importing from `vite` or `vitest`, import from `vite-plus`. For example: `import { defineConfig } from 'vite-plus'` or `import { expect, test } from 'vite-plus/test'`.
-- **Type-Aware Linting:** No need to install `oxlint-tsgolint`, `vp lint --type-aware` works out of the box.
-
-### Review Checklist
-
-- [ ] Run `vp install` after pulling remote changes and before getting started
-- [ ] Run `vp check` and `vp test` to validate changes
+- **Stick to ES modules** – no `require` or other CommonJS patterns.
+- **Prefer `import type`** – separate type-only imports.
+- **Use the `node:` protocol** – write `import fs from 'node:fs'` rather than bare `'fs'`.
+- **Arrays = `T[]`** – use shorthand array syntax consistently.
+- **Don't reassign parameters** – treat function arguments as read-only.
+- **Favor `let`** – use `let` over `const` for bindings, unless declaring a truly top-level constant. Then declare it with an all caps binding as a `const`.
+- **One `let` per line** – declare variables individually.
+- **Skip non-null assertions** – rewrite code so `!` isn't necessary.
+- **Avoid `enum`** – choose unions, objects, or literal types instead.
+- **Stick with `trimStart/End`** – don't use `trimLeft/Right`.
+- **Default parameters go last** – never precede required params with optional ones.
+- **Self-close when empty** – use `<Component />` instead of `<Component></Component>` when there are no children.
+- **No unused template literals** – convert to quotes if you're not interpolating.
+- **Don't write `substr`** – use `slice` instead.
+- **Flatten simple `if` chains** – collapse `else { if … }` when feasible.
+- **Keep member access simple** – omit `public`, `private`, or `protected`. Use native JavaScript private properties (e.g. `#property`) when you need to make a property private.
+- **Leverage `as const`** – assert immutability where appropriate.
+- **Kill useless `else` blocks** – when the `if` branch returns or throws, omit the `else`.
