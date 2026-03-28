@@ -1,43 +1,21 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
 import mdx from "@mdx-js/rollup";
-import { unstable_reactRouterRSC as reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
-import rsc from "@vitejs/plugin-rsc";
-import devtoolsJson from "vite-plugin-devtools-json";
 import { defineConfig } from "vite-plus";
 
 import { contentLayer } from "./content-layer/plugin.ts";
-import { reactCompiler } from "./react-compiler.plugin.ts";
+import { remix } from "./remix.plugin.ts";
 
-const IS_TEST = Boolean(process.env.VITEST);
+let IS_TEST = Boolean(process.env.VITEST);
 
 export default defineConfig({
+    build: {
+        // Prevent SVG sprites from being inlined as data URIs,
+        // which breaks <use href="...#fragment"> references.
+        assetsInlineLimit: 0,
+    },
     css: {
         transformer: "lightningcss",
-    },
-    environments: {
-        client: {
-            optimizeDeps: {
-                include: [
-                    "react-router",
-                    "react-router/dom",
-                    "react-router/internal/react-server-client",
-                ],
-            },
-        },
-        rsc: {
-            optimizeDeps: {
-                exclude: ["react-router"],
-            },
-            resolve: {
-                conditions: ["react-server"],
-            },
-        },
-        ssr: {
-            optimizeDeps: {
-                exclude: ["react-router"],
-            },
-        },
     },
     fmt: {
         arrowParens: "avoid",
@@ -69,7 +47,7 @@ export default defineConfig({
         },
         sortTailwindcss: {
             functions: ["cx", "cva"],
-            stylesheet: "./app/styles/tailwind.css",
+            stylesheet: "./app/tailwind.css",
         },
         tabWidth: 4,
     },
@@ -82,16 +60,13 @@ export default defineConfig({
             browser: true,
             node: true,
         },
-        ignorePatterns: ["**/worker-configuration.d.ts"],
-        jsPlugins: [
-            "eslint-plugin-perfectionist",
-            { name: "react-compiler", specifier: "eslint-plugin-react-hooks" },
-        ],
+        ignorePatterns: ["**/worker-configuration.d.ts", "dist/**"],
+        jsPlugins: ["eslint-plugin-perfectionist"],
         options: {
             typeAware: true,
             typeCheck: true,
         },
-        plugins: ["react", "jsx-a11y", "jsdoc", "import", "node", "promise", "vitest"],
+        plugins: ["jsx-a11y", "jsdoc", "import", "node", "promise", "vitest"],
         rules: {
             "eslint/default-param-last": "error",
             "eslint/func-style": ["error", "declaration"],
@@ -153,54 +128,6 @@ export default defineConfig({
             "node/no-process-env": "off",
 
             "perfectionist/sort-jsx-props": "warn",
-            "react-compiler/component-hook-factories": "error",
-            "react-compiler/error-boundaries": "error",
-            "react-compiler/globals": "error",
-            "react-compiler/immutability": "error",
-            "react-compiler/incompatible-library": "error",
-            "react-compiler/preserve-manual-memoization": "error",
-            "react-compiler/purity": "error",
-            "react-compiler/refs": "error",
-            "react-compiler/set-state-in-effect": "error",
-            "react-compiler/set-state-in-render": "error",
-            "react-compiler/static-components": "error",
-            "react-compiler/unsupported-syntax": "error",
-            "react-compiler/use-memo": "error",
-            "react/exhaustive-deps": "warn",
-            "react/jsx-boolean-value": "warn",
-            "react/jsx-filename-extension": "off",
-            "react/jsx-max-depth": "off",
-            "react/jsx-fragments": "warn",
-            "react/jsx-key": "error",
-            "react/jsx-no-constructed-context-values": "error",
-            "react/jsx-no-duplicate-props": "error",
-            "react/jsx-no-script-url": "error",
-            "react/jsx-no-target-blank": "warn",
-            "react/jsx-no-useless-fragment": "warn",
-            "react/jsx-pascal-case": "error",
-            "react/jsx-props-no-spread-multi": "error",
-            "react/no-array-index-key": "off",
-            "react/no-multi-comp": "off",
-            "react/react-in-jsx-scope": "off",
-            "react/only-export-components": [
-                "error",
-                {
-                    allowExportNames: [
-                        "meta",
-                        "links",
-                        "headers",
-                        "loader",
-                        "action",
-                        "clientLoader",
-                        "clientAction",
-                        "middleware",
-                        "shouldRevalidate",
-                        "handle",
-                    ],
-                },
-            ],
-            "react/rules-of-hooks": "error",
-            "react/self-closing-comp": "error",
 
             "typescript/consistent-type-imports": "error",
             "typescript/no-empty-interface": "warn",
@@ -219,17 +146,8 @@ export default defineConfig({
             "jsx-a11y": {
                 components: {
                     Link: "a",
-                    NavLink: "a",
                 },
                 polymorphicPropName: "as",
-            },
-            react: {
-                formComponents: ["Form"],
-                linkComponents: [
-                    "DirectoryLink",
-                    { attribute: "to", name: "Link" },
-                    { attribute: "to", name: "NavLink" },
-                ],
             },
             vitest: {
                 typecheck: true,
@@ -238,27 +156,15 @@ export default defineConfig({
     },
     plugins: [
         contentLayer(),
-        mdx(),
-        reactRouter(),
-        rsc(),
-        reactCompiler(),
+        mdx({ jsxImportSource: "remix/component" }),
+        remix({ clientEntry: false, serverHandler: false }),
         !IS_TEST &&
             cloudflare({
-                auxiliaryWorkers: [
-                    {
-                        configPath: "./wrangler.rsc.jsonc",
-                        viteEnvironment: {
-                            name: "rsc",
-                        },
-                    },
-                ],
-                configPath: "./wrangler.ssr.jsonc",
                 viteEnvironment: {
                     name: "ssr",
                 },
             }),
         tailwindcss(),
-        devtoolsJson(),
     ],
     resolve: {
         tsconfigPaths: true,
@@ -271,13 +177,6 @@ export default defineConfig({
             },
             typecheck: {
                 command: "tsgo --noEmit",
-                dependsOn: ["typegen:react-router", "typegen:cloudflare"],
-            },
-            "typegen:cloudflare": {
-                command: "wrangler types -c wrangler.rsc.jsonc",
-            },
-            "typegen:react-router": {
-                command: "react-router typegen",
             },
         },
     },

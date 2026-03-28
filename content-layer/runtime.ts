@@ -1,8 +1,7 @@
-import type { ComponentType } from "react";
+import type { ComponentType, DataEntry, DataStore, MarkdownHeading, RenderedEntry } from "./api.ts";
 
-import type { DataEntry, DataStore, MarkdownHeading, RenderedEntry } from "./api.ts";
-
-type EntryImporter = () => Promise<{ default: ComponentType; headings?: MarkdownHeading[] }>;
+// MDX modules export a raw function component (not a factory), so the default is Function
+type EntryImporter = () => Promise<{ default: Function; headings?: MarkdownHeading[] }>;
 
 interface ReferenceEntry {
     collection: string;
@@ -59,7 +58,12 @@ export function createRuntime(
             throw new Error(`No content found for entry "${key}"`);
         }
         const mod = await importer();
-        return { Content: mod.default, headings: mod.headings ?? [] };
+        // Wrap MDX component in a factory — MDX compiles to a function that
+        // returns JSX directly, but Remix 3 expects factory-pattern components
+        // that return a render function.
+        let MdxComponent = mod.default;
+        let Content: ComponentType = () => () => MdxComponent({});
+        return { Content, headings: mod.headings ?? [] };
     }
 
     function findCollectionForEntry(entry: DataEntry): string {

@@ -1,6 +1,6 @@
-import * as s from "@remix-run/data-schema";
-import * as check from "@remix-run/data-schema/checks";
-import { defineCollection } from "sprinkles:content";
+import * as s from "remix/data-schema";
+import * as check from "remix/data-schema/checks";
+import { defineCollection as collection } from "sprinkles:content";
 
 import { glob } from "../content-layer/loaders/index.ts";
 
@@ -13,8 +13,8 @@ function partialUrl() {
         );
 }
 
-let restaurants = defineCollection({
-    loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: `app/restaurants` }),
+let restaurants = collection({
+    loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: `app/content` }),
     schema: s.object({
         name: s.string(),
         address: s.string(),

@@ -3,9 +3,8 @@
 .env.local
 /node_modules/
 
-# React Router
-/.react-router/
-/build/
+# Remix
+/dist/
 
 # Content Layer
 /.sprinkles/

@@ -1,6 +1,8 @@
 import type { Schema } from "@remix-run/data-schema";
-import type { ComponentType } from "react";
+import type { RemixNode } from "remix/component";
 import type { FSWatcher } from "vite-plus";
+
+export type ComponentType = () => () => RemixNode;
 
 function todo(): never {
     throw new Error("Not implemented");

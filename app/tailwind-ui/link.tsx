@@ -1,59 +1,17 @@
-"use client";
+import type { RemixNode } from "remix/component";
 
-import type React from "react";
-import { Link as RACLink } from "react-aria-components";
-import { Link as RemixLink, NavLink as RemixNavLink } from "react-router";
-
-export const Link = function Link({
-    ref,
-    href,
-    children,
-    ...props
-}: {
+type LinkProps = {
     href: string;
-    ref?: React.Ref<HTMLAnchorElement>;
-} & React.ComponentPropsWithoutRef<"a">) {
-    return (
-        <RACLink
-            href={href}
-            ref={ref}
-            render={({ ref: domRef, className: _, ...domProps }) => (
-                <RemixLink
-                    {...domProps}
-                    {...props}
-                    ref={domRef as React.Ref<HTMLAnchorElement>}
-                    to={href}
-                >
-                    {children}
-                </RemixLink>
-            )}
-        />
-    );
+    class?: string;
+    target?: string;
+    rel?: string;
+    children: RemixNode;
 };
 
-export const NavLink = function Link({
-    ref,
-    href,
-    children,
-    ...props
-}: {
-    href: string;
-    ref?: React.Ref<HTMLAnchorElement>;
-} & React.ComponentPropsWithoutRef<"a">) {
-    return (
-        <RACLink
-            href={href}
-            ref={ref}
-            render={({ ref: domRef, className: _, ...domProps }) => (
-                <RemixNavLink
-                    {...domProps}
-                    {...props}
-                    ref={domRef as React.Ref<HTMLAnchorElement>}
-                    to={href}
-                >
-                    {children}
-                </RemixNavLink>
-            )}
-        />
+export function Link() {
+    return (props: LinkProps) => (
+        <a class={props.class} href={props.href} rel={props.rel} target={props.target}>
+            {props.children}
+        </a>
     );
-};
+}

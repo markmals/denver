@@ -348,7 +348,6 @@ export function contentLayer(options: ContentLayerPluginOptions = {}): Plugin {
         load(id) {
             if (id === RESOLVED_VIRTUAL_ID) {
                 return `
-import "server-only";
 export { defineCollection, reference } from "${resolve(config.root, "content-layer/config.ts")}";
 
 import { createRuntime } from "${resolve(config.root, "content-layer/runtime.ts")}";

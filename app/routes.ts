@@ -1,3 +1,5 @@
-import { index, type RouteConfig } from "@react-router/dev/routes";
+import { get, route } from "remix/fetch-router/routes";
 
-export default [index("home.tsx")] satisfies RouteConfig;
+export let routes = route({
+    home: get("/"),
+});

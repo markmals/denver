@@ -1,77 +1,144 @@
-import { BookOpenIcon } from "@heroicons/react/24/outline";
-import { Divider, Heading, Button } from "@tailwindcss/ui";
+import type { RemixNode } from "remix/component";
+import type { Controller } from "remix/fetch-router";
+
+import { Button, Divider, Heading } from "@tailwindcss/ui";
 import assert from "node:assert";
 import { getCollection, getEntry, render } from "sprinkles:content";
 
-export async function ServerComponent() {
-    let restaurants = await getCollection("restaurants");
+import icons from "~/assets/icons.svg?url";
+import styles from "~/assets/tailwind.css?url";
+import { document } from "~/lib/render.tsx";
 
-    return (
-        <div className="flex flex-col gap-4">
-            <Heading className="truncate">Denver Restaurants</Heading>
-            <Divider />
-            <ul className="flex flex-col border-black/15 *:border-b *:last:border-none dark:border-white/15">
-                {restaurants.map(restaurant => (
-                    <ListItem id={restaurant.id} key={restaurant.id} />
-                ))}
-            </ul>
-        </div>
-    );
+import { routes } from "./routes.ts";
+
+export default {
+    actions: {
+        async home() {
+            let restaurants = await getCollection("restaurants");
+
+            let items = await Promise.all(
+                restaurants.map(async restaurant => {
+                    let entry = await getEntry("restaurants", restaurant.id);
+                    assert(entry, `Could not find entry for slug: ${restaurant.id}`);
+                    let { Content } = await render(entry);
+                    return { data: entry.data, content: Content };
+                }),
+            );
+
+            return document(
+                <html lang="en">
+                    <head>
+                        <meta charset="utf-8" />
+                        <meta content="width=device-width, initial-scale=1" name="viewport" />
+                        <meta content="#000000" name="theme-color" />
+                        <link href={styles} rel="stylesheet" />
+                        <link href="https://rsms.me/inter/inter.css" rel="stylesheet" />
+                        <link href="favicon.png" rel="icon" type="image/png" />
+                        {import.meta.env.DEV && <script async src="/@vite/client" type="module" />}
+                        <title>Denver Restaurants</title>
+                    </head>
+                    <body class="relative isolate flex min-h-svh w-full flex-col bg-gray-200 text-zinc-950 dark:bg-black dark:text-white">
+                        <main class="flex flex-1 flex-col px-2 py-2">
+                            <div class="grow rounded-lg bg-white p-10 shadow-xs ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+                                <div class="mx-auto max-w-6xl">
+                                    <div class="flex flex-col gap-4">
+                                        <Heading>Denver Restaurants</Heading>
+                                        <Divider />
+                                        <ul class="flex flex-col border-black/15 *:border-b *:last:border-none dark:border-white/15">
+                                            {items.map(item => (
+                                                <ListItem
+                                                    address={item.data.address}
+                                                    content={item.content}
+                                                    cuisine={item.data.cuisine}
+                                                    menu={item.data.menu}
+                                                    name={item.data.name}
+                                                    thumbnail={item.data.thumbnail}
+                                                />
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </body>
+                </html>,
+            );
+        },
+    },
+} satisfies Controller<typeof routes>;
+
+function Icon() {
+    return (props: { name: string; size?: number; class?: string }) => {
+        let size = props.size ?? 24;
+        return (
+            <svg aria-hidden="true" data-slot="icon" height={size} width={size}>
+                <use href={`${icons}#icon-${props.name}`} />
+            </svg>
+        );
+    };
 }
 
-async function ListItem({ id }: { id: string }) {
-    let entry = await getEntry("restaurants", id);
-    assert(entry, `Could not find entry for slug: ${id}`);
-    let { Content } = await render(entry);
+interface ListItemProps {
+    name: string;
+    address: string;
+    cuisine: string;
+    menu?: string;
+    thumbnail: string;
+    content: () => () => RemixNode;
+}
 
-    return (
-        <li className="border-black/15 py-6 first-of-type:pt-0! dark:border-white/15">
-            <div className="flex flex-col items-start gap-6 md:flex-row">
-                <div className="relative w-full md:w-auto">
-                    <div className="aspect-3/2 md:aspect-square block w-full overflow-hidden rounded-lg bg-black/10 md:w-52 dark:bg-white/10">
-                        <img alt="" className="size-full object-cover" src={entry.data.thumbnail} />
+function ListItem() {
+    return (props: ListItemProps) => {
+        let { content: Content } = props;
+        return (
+            <li class="border-black/15 py-6 first-of-type:pt-0! dark:border-white/15">
+                <div class="flex flex-col items-start gap-6 md:flex-row">
+                    <div class="relative w-full md:w-auto">
+                        <div class="block aspect-3/2 w-full overflow-hidden rounded-lg bg-black/10 md:aspect-square md:w-52 dark:bg-white/10">
+                            <img alt="" class="size-full object-cover" src={props.thumbnail} />
+                        </div>
                     </div>
-                </div>
-                <div className="flex w-full flex-col justify-between gap-2 overflow-hidden">
-                    <div className="flex flex-col gap-2">
-                        <div className="flex flex-col gap-1">
-                            <h2 className="text-xl font-medium text-black/95 md:truncate dark:text-white/95">
-                                {entry.data.name}
-                            </h2>
-                            <div className="text-sm text-black/70 dark:text-white/70">
-                                <span className="inline-block text-wrap">
-                                    {entry.data.cuisine} •{" "}
-                                    <a
-                                        className="underline hover:text-blue-500 dark:hover:text-blue-400"
-                                        href={`https://www.google.com/maps/dir/?api=1&destination=${entry.data.address
-                                            .split(" ")
-                                            .join("+")}`}
-                                        target="_blank"
-                                    >
-                                        {entry.data.address}
-                                    </a>
-                                </span>
+                    <div class="flex w-full flex-col justify-between gap-2 overflow-hidden">
+                        <div class="flex flex-col gap-2">
+                            <div class="flex flex-col gap-1">
+                                <h2 class="text-xl font-medium text-black/95 md:truncate dark:text-white/95">
+                                    {props.name}
+                                </h2>
+                                <div class="text-sm text-black/70 dark:text-white/70">
+                                    <span class="inline-block text-wrap">
+                                        {props.cuisine} •{" "}
+                                        <a
+                                            class="underline hover:text-blue-500 dark:hover:text-blue-400"
+                                            href={`https://www.google.com/maps/dir/?api=1&destination=${props.address
+                                                .split(" ")
+                                                .join("+")}`}
+                                            target="_blank"
+                                        >
+                                            {props.address}
+                                        </a>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-sm text-black/70 dark:text-white/70">
+                                <Content />
                             </div>
                         </div>
-                        <div className="text-sm text-black/70 dark:text-white/70">
-                            <Content />
+                        <div>
+                            {props.menu !== undefined && (
+                                <Button
+                                    class="text-blue-500 dark:text-blue-400"
+                                    href={props.menu}
+                                    plain
+                                    target="_blank"
+                                >
+                                    Menu
+                                    <Icon name="book-open" />
+                                </Button>
+                            )}
                         </div>
                     </div>
-                    <div>
-                        {entry.data.menu !== undefined && (
-                            <Button
-                                className="text-blue-500 dark:text-blue-400"
-                                href={entry.data.menu}
-                                plain
-                                target="_blank"
-                            >
-                                Menu
-                                <BookOpenIcon className="stroke-blue-500 dark:stroke-blue-400" />
-                            </Button>
-                        )}
-                    </div>
                 </div>
-            </div>
-        </li>
-    );
+            </li>
+        );
+    };
 }
