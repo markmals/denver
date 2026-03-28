@@ -46,13 +46,16 @@ export function remix({
             },
             config() {
                 return {
+                    build: {
+                        assetsInlineLimit: 0,
+                    },
                     environments: {
                         ...(hasClientEntry && {
                             client: {
                                 build: {
                                     outDir: "dist/client",
                                     rollupOptions: {
-                                        input: clientEntry,
+                                        input: clientEntry || undefined,
                                     },
                                 },
                             },

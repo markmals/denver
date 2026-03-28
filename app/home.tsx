@@ -159,7 +159,7 @@ function ListItem() {
                             </div>
                         </div>
                         <div>
-                            {props.menu !== undefined && (
+                            {props.menu && (
                                 <Button
                                     href={props.menu}
                                     mix={css({
