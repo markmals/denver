@@ -21,6 +21,7 @@ export default defineConfig({
         transformer: "lightningcss",
     },
     fmt: {
+        ignorePatterns: ["**/worker-configuration.d.ts", "dist/**"],
         tabWidth: 4,
         arrowParens: "avoid",
         sortImports: {

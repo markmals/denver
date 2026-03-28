@@ -64,7 +64,7 @@ export function remix({
                             build: {
                                 outDir: "dist/ssr",
                                 rollupOptions: {
-                                    input: { "entry.server": serverEntry },
+                                    input: { index: serverEntry },
                                 },
                             },
                         },
@@ -77,7 +77,7 @@ export function remix({
             async configurePreviewServer(server) {
                 let ssrOutDir = server.config.environments.ssr?.build?.outDir ?? "dist/ssr";
                 let entryPath = new URL(
-                    `${ssrOutDir}/entry.server.js`,
+                    `${ssrOutDir}/index.js`,
                     `file://${server.config.root}/`,
                 ).href;
 
