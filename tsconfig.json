@@ -17,8 +17,6 @@
         "jsxImportSource": "remix/component",
         "paths": {
             "~/*": ["./app/*"],
-            "@tailwindcss/ui": ["./app/tailwind-ui/index.ts"],
-            "@tailwindcss/ui/*": ["./app/tailwind-ui/*"]
         }
     }
 }

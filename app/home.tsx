@@ -1,15 +1,16 @@
 import type { RemixNode } from "remix/component";
 import type { Controller } from "remix/fetch-router";
 
-import { Button, Divider, Heading } from "@tailwindcss/ui";
 import assert from "node:assert";
 import { getCollection, getEntry, render } from "sprinkles:content";
 
 import icons from "~/assets/icons.svg?url";
 import styles from "~/assets/tailwind.css?url";
+import { Button } from "~/components/button.tsx";
+import { Divider } from "~/components/divider.tsx";
+import { Heading } from "~/components/heading.tsx";
 import { document } from "~/lib/render.tsx";
-
-import { routes } from "./routes.ts";
+import { routes } from "~/routes.ts";
 
 export default {
     actions: {
@@ -46,14 +47,7 @@ export default {
                                         <Divider />
                                         <ul class="flex flex-col border-black/15 *:border-b *:last:border-none dark:border-white/15">
                                             {items.map(item => (
-                                                <ListItem
-                                                    address={item.data.address}
-                                                    content={item.content}
-                                                    cuisine={item.data.cuisine}
-                                                    menu={item.data.menu}
-                                                    name={item.data.name}
-                                                    thumbnail={item.data.thumbnail}
-                                                />
+                                                <ListItem {...item.data} content={item.content} />
                                             ))}
                                         </ul>
                                     </div>
