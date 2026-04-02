@@ -4,12 +4,7 @@
     "type": "module",
     "dependencies": {
         "@hiogawa/vite-plugin-fullstack": "^0.0.11",
-        "@remix-run/data-schema": "^0.1.0",
-        "@std/jsonc": "jsr:^1.0.2",
-        "@std/yaml": "jsr:^1.0.12",
-        "clsx": "^2.1.1",
-        "github-slugger": "^2.0.0",
-        "gray-matter": "^4.0.3",
+        "@withsprinkles/content-layer": "^0.1.0",
         "remix": "3.0.0-alpha.4"
     },
     "devDependencies": {
@@ -24,7 +19,7 @@
         "vitest": "npm:@voidzero-dev/vite-plus-test@^0.1.14",
         "wrangler": "^4.73.0"
     },
-    "packageManager": "pnpm@10.32.1",
+    "packageManager": "pnpm@10.33.0",
     "pnpm": {
         "onlyBuiltDependencies": [
             "esbuild",

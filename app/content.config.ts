@@ -1,8 +1,8 @@
 import * as s from "remix/data-schema";
 import * as check from "remix/data-schema/checks";
-import { defineCollection as collection } from "sprinkles:content";
+import { defineCollection as collection } from "@withsprinkles/content-layer";
 
-import { glob } from "../content-layer/loaders/index.ts";
+import { glob } from "@withsprinkles/content-layer/loaders";
 
 function partialUrl() {
     return s

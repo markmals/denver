@@ -1,18 +1,16 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
 import mdx from "@mdx-js/rollup";
+import { contentLayer } from "@withsprinkles/content-layer/remix";
 import { defineConfig } from "vite-plus";
 
-import { contentLayer } from "./content-layer/plugin.ts";
 import { remix } from "./remix.plugin.ts";
-
-let IS_TEST = Boolean(process.env.VITEST);
 
 export default defineConfig({
     plugins: [
         contentLayer(),
         mdx({ jsxImportSource: "remix/component" }),
         remix({ clientEntry: false, serverHandler: false }),
-        !IS_TEST && cloudflare({ viteEnvironment: { name: "ssr" } }),
+        cloudflare({ viteEnvironment: { name: "ssr" } }),
     ],
     resolve: {
         tsconfigPaths: true,
@@ -63,8 +61,5 @@ export default defineConfig({
             "typescript/unbound-method": "allow",
             "perfectionist/sort-jsx-props": "warn",
         },
-    },
-    test: {
-        include: ["**/*.test.ts"],
     },
 });
